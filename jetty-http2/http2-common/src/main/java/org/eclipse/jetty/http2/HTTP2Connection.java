@@ -35,6 +35,7 @@ import org.eclipse.jetty.util.component.LifeCycle;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
 import org.eclipse.jetty.util.thread.ExecutionStrategy;
+import org.eclipse.jetty.util.thread.TryExecutor;
 import org.eclipse.jetty.util.thread.strategy.EatWhatYouKill;
 
 public class HTTP2Connection extends AbstractConnection
@@ -57,7 +58,10 @@ public class HTTP2Connection extends AbstractConnection
         this.parser = parser;
         this.session = session;
         this.bufferSize = bufferSize;
-        this.strategy = new EatWhatYouKill(producer, executor, 0);
+        
+        // Disable EWYK for HTTP2
+        executor = new TryExecutor.NoTryExecutor(executor);
+        this.strategy = new EatWhatYouKill(producer, executor);
         
         LifeCycle.start(strategy);
     }
